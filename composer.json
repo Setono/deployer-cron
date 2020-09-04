@@ -30,7 +30,10 @@
     "autoload": {
         "psr-4": {
             "Setono\\Deployer\\Cron\\": "src/"
-        }
+        },
+        "files": [
+            "src/autoload.php"
+        ]
     },
     "prefer-stable": true,
     "scripts": {

@@ -5,6 +5,8 @@ declare(strict_types=1);
 use function Deployer\after;
 use function Deployer\before;
 
+require_once 'task/cron.php';
+
 // download and build are done before anything else because we can stop the deploy if
 // any errors happen in either of these two tasks
 before('deploy:prepare', 'cron:download');
