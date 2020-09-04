@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Setono\Deployer\Cron;
 
-use Setono\CronBuilder\VariableResolver\VariableResolverInterface;
 use function Deployer\download;
 use function Deployer\get;
 use function Deployer\run;
@@ -16,6 +15,7 @@ use function Safe\file_get_contents;
 use function Safe\file_put_contents;
 use function Safe\unlink;
 use Setono\CronBuilder\CronBuilder;
+use Setono\CronBuilder\VariableResolver\VariableResolverInterface;
 
 set('cron_source_dir', 'etc/cronjobs');
 set('cron_delimiter', '{{application}} ({{stage}})');
