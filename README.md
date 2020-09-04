@@ -36,7 +36,7 @@ The following Deployer parameters are defined:
 | cron_user               | The user onto which the crontab should be added                                                  | `get('http_user')` if you are root, else `''` |
 
 **NOTICE** that the default value of `cron_variable_resolvers` is an empty array, but this lib will always add a
-`ReplacingVariableResolver` with the variables described in the section [below](#Extra-variables-available).
+`ReplacingVariableResolver` with the variables described in the section [below](#extra-variables-available).
 
 ## Build context
 
