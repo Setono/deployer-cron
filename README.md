@@ -13,6 +13,16 @@ Simple handling of cronjobs in your deployment process using the [Cron builder l
 $ composer require setono/deployer-cron
 ```
 
+## Usage
+The easiest usage is to include the cron recipe which hooks into default Deployer events:
+
+```php
+<?php
+// deploy.php
+
+require_once 'recipe/cron.php';
+```
+
 [ico-version]: https://poser.pugx.org/setono/deployer-cron/v/stable
 [ico-unstable-version]: https://poser.pugx.org/setono/deployer-cron/v/unstable
 [ico-license]: https://poser.pugx.org/setono/deployer-cron/license
