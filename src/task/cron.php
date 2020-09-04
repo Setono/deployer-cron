@@ -9,9 +9,11 @@ use function Deployer\get;
 use function Deployer\run;
 use function Deployer\set;
 use function Deployer\task;
+use function Deployer\test;
 use function Deployer\upload;
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
+use function Safe\unlink;
 use Setono\CronBuilder\CronBuilder;
 
 set('cron_source_dir', 'etc/cronjobs');
@@ -35,16 +37,34 @@ task('cron:build', static function (): void {
 
     $newCrontab = $cronBuilder->merge($existingCrontab, $cronBuilder->build());
 
-    if('' !== $newCrontab) {
+    if ('' !== $newCrontab) {
         file_put_contents('new_crontab.txt', $newCrontab);
     }
 })->desc('Builds a new crontab and saves it to new_crontab.txt');
 
 task('cron:upload', static function (): void {
-    if(!file_exists('new_crontab.txt')) {
+    if (!file_exists('new_crontab.txt')) {
         return;
     }
 
     upload('new_crontab.txt', 'new_crontab.txt');
     run('cat new_crontab.txt | crontab -');
 })->desc('Uploads and applies the new crontab');
+
+task('cron:cleanup', static function (): void {
+    if (file_exists('existing_crontab.txt')) {
+        @unlink('existing_crontab.txt');
+    }
+
+    if (file_exists('new_crontab.txt')) {
+        @unlink('new_crontab.txt');
+    }
+
+    if (test('[ -f existing_crontab.txt ]')) {
+        run('rm existing_crontab.txt');
+    }
+
+    if (test('[ -f new_crontab.txt ]')) {
+        run('rm new_crontab.txt');
+    }
+})->desc('Removes any generated files');

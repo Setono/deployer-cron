@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use function Deployer\after;
 use function Deployer\before;
 
@@ -10,3 +12,6 @@ after('cron:download', 'cron:build');
 
 // and then we upload the generated crontab when we are pointing the symlink to the new directory
 after('deploy:symlink', 'cron:upload');
+
+// cleanup created files
+after('cleanup', 'cron:cleanup');
