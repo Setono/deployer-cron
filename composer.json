@@ -32,16 +32,11 @@
             "Setono\\Deployer\\Cron\\": "src/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Setono\\Deployer\\Cron\\": "tests/"
-        }
-    },
     "prefer-stable": true,
     "scripts": {
         "analyse": "phpstan analyse -c phpstan.neon -l max src",
-        "check-style": "ecs check --ansi src/ tests/",
-        "fix-style": "ecs check --fix --ansi src/ tests/",
+        "check-style": "ecs check --ansi src/",
+        "fix-style": "ecs check --fix --ansi src/",
         "phpunit": "phpunit"
     }
 }
