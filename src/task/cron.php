@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Setono\Deployer\Cron;
 
+use Setono\CronBuilder\VariableResolver\VariableResolverInterface;
 use function Deployer\download;
 use function Deployer\get;
 use function Deployer\run;
@@ -18,6 +19,7 @@ use Setono\CronBuilder\CronBuilder;
 
 set('cron_source_dir', 'etc/cronjobs');
 set('cron_delimiter', '{{application}} ({{stage}})');
+set('cron_variable_resolvers', []);
 
 task('cron:download', static function (): void {
     run('crontab -l 2>/dev/null > existing_crontab.txt');
@@ -34,6 +36,12 @@ task('cron:build', static function (): void {
         'source' => get('cron_source_dir'),
         'delimiter' => get('cron_delimiter'),
     ]);
+
+    /** @var VariableResolverInterface[] $variableResolvers */
+    $variableResolvers = get('cron_variable_resolvers');
+    foreach ($variableResolvers as $variableResolver) {
+        $cronBuilder->addVariableResolver($variableResolver);
+    }
 
     $newCrontab = $cronBuilder->merge($existingCrontab, $cronBuilder->build());
 
