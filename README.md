@@ -5,6 +5,8 @@
 [![Software License][ico-license]](LICENSE)
 [![Build Status][ico-github-actions]][link-github-actions]
 
+Simple handling of cronjobs in your deployment process using the [Cron builder library](https://github.com/Setono/cron-builder).
+
 ## Installation
 
 ```bash
