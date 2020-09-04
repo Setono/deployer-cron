@@ -1,0 +1,159 @@
+name: build
+
+on:
+    push:
+        branches:
+            - "master"
+    pull_request: ~
+    schedule:
+        -   cron: 5 8 * * 2
+
+env:
+    PHP_EXTENSIONS: "mbstring"
+
+jobs:
+    coding-standards:
+        name: "Coding Standards"
+
+        runs-on: "ubuntu-latest"
+
+        strategy:
+            matrix:
+                php-version:
+                    - "7.4"
+
+                dependencies:
+                    - "highest"
+
+        steps:
+            -   name: "Checkout"
+                uses: "actions/checkout@v2.3.2"
+
+            -   name: "Install PHP with extensions"
+                uses: "shivammathur/setup-php@2.4.3"
+                with:
+                    coverage: "none"
+                    extensions: "${{ env.PHP_EXTENSIONS }}"
+                    php-version: "${{ matrix.php-version }}"
+
+            -   name: "Validate composer.json and composer.lock"
+                run: "composer validate --strict"
+
+            -   name: "Determine composer cache directory"
+                uses: "./.github/actions/composer/composer/determine-cache-directory"
+
+            -   name: "Cache dependencies installed with composer"
+                uses: "actions/cache@v2.1.1"
+                with:
+                    path: "${{ env.COMPOSER_CACHE_DIR }}"
+                    key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('composer.lock') }}"
+                    restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
+
+            -   name: "Install ${{ matrix.dependencies }} dependencies with composer"
+                uses: "./.github/actions/composer/composer/install"
+                with:
+                    dependencies: "${{ matrix.dependencies }}"
+
+            -   name: "Run ergebnis/composer-normalize"
+                run: "composer normalize --dry-run"
+
+            -   name: "Run symplify/easy-coding-standard"
+                run: "composer check-style"
+
+    dependency-analysis:
+        name: "Dependency Analysis"
+
+        runs-on: "ubuntu-latest"
+
+        strategy:
+            matrix:
+                php-version:
+                    - "7.4"
+
+                dependencies:
+                    - "highest"
+
+        steps:
+            -   name: "Checkout"
+                uses: "actions/checkout@v2.3.2"
+
+            -   name: "Install PHP with extensions"
+                uses: "shivammathur/setup-php@2.4.3"
+                with:
+                    coverage: "none"
+                    extensions: "${{ env.PHP_EXTENSIONS }}"
+                    php-version: "${{ matrix.php-version }}"
+                    tools: "composer-require-checker, composer-unused"
+
+            -   name: "Determine composer cache directory"
+                uses: "./.github/actions/composer/composer/determine-cache-directory"
+
+            -   name: "Cache dependencies installed with composer"
+                uses: "actions/cache@v2.1.1"
+                with:
+                    path: "${{ env.COMPOSER_CACHE_DIR }}"
+                    key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('composer.lock') }}"
+                    restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
+
+            -   name: "Install ${{ matrix.dependencies }} dependencies with composer"
+                uses: "./.github/actions/composer/composer/install"
+                with:
+                    dependencies: "${{ matrix.dependencies }}"
+
+            -   name: "Run maglnet/composer-require-checker"
+                run: "composer-require-checker check"
+
+            -   name: "Run icanhazstring/composer-unused"
+                run: "composer-unused"
+
+    static-code-analysis:
+        name: "Static Code Analysis"
+
+        runs-on: "ubuntu-latest"
+
+        strategy:
+            matrix:
+                php-version:
+                    - "7.4"
+
+                dependencies:
+                    - "highest"
+
+        steps:
+            -   name: "Checkout"
+                uses: "actions/checkout@v2.3.2"
+
+            -   name: "Install PHP with extensions"
+                uses: "shivammathur/setup-php@2.4.3"
+                with:
+                    coverage: "none"
+                    extensions: "${{ env.PHP_EXTENSIONS }}"
+                    php-version: "${{ matrix.php-version }}"
+
+            -   name: "Determine composer cache directory"
+                uses: "./.github/actions/composer/composer/determine-cache-directory"
+
+            -   name: "Cache dependencies installed with composer"
+                uses: "actions/cache@v2.1.1"
+                with:
+                    path: "${{ env.COMPOSER_CACHE_DIR }}"
+                    key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('composer.lock') }}"
+                    restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
+
+            -   name: "Install ${{ matrix.dependencies }} dependencies with composer"
+                uses: "./.github/actions/composer/composer/install"
+                with:
+                    dependencies: "${{ matrix.dependencies }}"
+
+            -   name: "Create cache directory for phpstan/phpstan"
+                run: "mkdir -p .build/phpstan"
+
+            -   name: "Cache cache directory for phpstan/phpstan"
+                uses: "actions/cache@v2.1.1"
+                with:
+                    path: ".build/phpstan"
+                    key: "php-${{ matrix.php-version }}-phpstan-${{ github.sha }}"
+                    restore-keys: "php-${{ matrix.php-version }}-phpstan-"
+
+            -   name: "Run phpstan/phpstan"
+                run: "composer analyse"

@@ -1,0 +1,4 @@
+suites:
+    main:
+        namespace: Setono\TagBag
+        psr4_prefix: Setono\TagBag
