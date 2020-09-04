@@ -13,16 +13,35 @@ use function Deployer\test;
 use function Deployer\upload;
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
+use function Safe\sprintf;
 use function Safe\unlink;
 use Setono\CronBuilder\CronBuilder;
+use Setono\CronBuilder\VariableResolver\ReplacingVariableResolver;
 use Setono\CronBuilder\VariableResolver\VariableResolverInterface;
 
 set('cron_source_dir', 'etc/cronjobs');
-set('cron_delimiter', '{{application}} ({{stage}})');
+set('cron_delimiter', static function (): string {
+    return sprintf('%s (%s)', get('application'), get('stage'));
+});
 set('cron_variable_resolvers', []);
+set('cron_context', static function (): array {
+    return [
+        'stage' => get('stage'),
+    ];
+});
+set('cron_user', static function (): string {
+    $user = run('whoami');
+    if ('root' !== $user) {
+        return '';
+    }
+
+    return get('http_user');
+});
 
 task('cron:download', static function (): void {
-    run('crontab -l 2>/dev/null > existing_crontab.txt');
+    $cronUser = get('cron_user');
+
+    run(sprintf('crontab -l%s 2>/dev/null > existing_crontab.txt', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
     download('existing_crontab.txt', 'existing_crontab.txt');
 })->desc('Downloads existing crontab to existing_crontab.txt file');
 
@@ -43,7 +62,14 @@ task('cron:build', static function (): void {
         $cronBuilder->addVariableResolver($variableResolver);
     }
 
-    $newCrontab = $cronBuilder->merge($existingCrontab, $cronBuilder->build());
+    $cronBuilder->addVariableResolver(new ReplacingVariableResolver([
+        'application' => get('application'),
+        'stage' => get('stage'),
+        'php_bin' => get('bin/php'),
+        'release_path' => get('release_path'),
+    ]));
+
+    $newCrontab = $cronBuilder->merge($existingCrontab, $cronBuilder->build(get('cron_context')));
 
     if ('' !== $newCrontab) {
         file_put_contents('new_crontab.txt', $newCrontab);
@@ -55,8 +81,10 @@ task('cron:upload', static function (): void {
         return;
     }
 
+    $cronUser = get('cron_user');
+
     upload('new_crontab.txt', 'new_crontab.txt');
-    run('cat new_crontab.txt | crontab -');
+    run(sprintf('cat new_crontab.txt | crontab%s -', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
 })->desc('Uploads and applies the new crontab');
 
 task('cron:cleanup', static function (): void {
