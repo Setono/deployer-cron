@@ -29,9 +29,11 @@ set('cron_context', static function (): array {
         'stage' => get('stage'),
     ];
 });
+
+// If you're deploying as root you have the option to edit other users' crontabs
+// So this parameters the user to the http_user if you're deploying as root else we don't set it
 set('cron_user', static function (): string {
-    $user = run('whoami');
-    if ('root' !== $user) {
+    if ('root' !== run('whoami')) {
         return '';
     }
 
