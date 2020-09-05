@@ -6,6 +6,7 @@ namespace Setono\Deployer\Cron;
 
 use function Deployer\download;
 use function Deployer\get;
+use function Deployer\parse;
 use function Deployer\run;
 use function Deployer\set;
 use function Deployer\task;
@@ -21,7 +22,7 @@ use Setono\CronBuilder\VariableResolver\VariableResolverInterface;
 
 set('cron_source_dir', 'etc/cronjobs');
 set('cron_delimiter', static function (): string {
-    return sprintf('%s (%s)', get('application'), get('stage'));
+    return parse('{{application}} ({{stage}})');
 });
 set('cron_variable_resolvers', []);
 set('cron_context', static function (): array {
