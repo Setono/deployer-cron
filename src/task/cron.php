@@ -44,7 +44,7 @@ set('cron_user', static function (): string {
 task('cron:download', static function (): void {
     $cronUser = get('cron_user');
 
-    run(sprintf('crontab -l%s 2>/dev/null > existing_crontab.txt', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
+    run(sprintf('(crontab -l%s 2>/dev/null || true) > existing_crontab.txt', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
     download('existing_crontab.txt', 'existing_crontab.txt');
 })->desc('Downloads existing crontab to existing_crontab.txt file');
 
