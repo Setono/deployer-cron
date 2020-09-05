@@ -17,3 +17,4 @@ after('deploy:symlink', 'cron:upload');
 
 // cleanup created files
 after('cleanup', 'cron:cleanup');
+after('deploy:failed', 'cron:cleanup');
