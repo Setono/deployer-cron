@@ -7,10 +7,11 @@ use function Deployer\before;
 
 require_once 'task/cron.php';
 
-// download and build are done before anything else because we can stop the deploy if
-// any errors happen in either of these two tasks
+// download existing cron before anything else because we can stop the deploy if any errors happen
 before('deploy:prepare', 'cron:download');
-after('cron:download', 'cron:build');
+
+// build the cron just before symlinking. This is where all the necessary parameters are available, i.e. 'release_path'
+before('deploy:symlink', 'cron:build');
 
 // and then we upload the generated crontab when we are pointing the symlink to the new directory
 after('deploy:symlink', 'cron:upload');
