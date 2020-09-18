@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace Setono\Deployer\Cron;
 
-use function Deployer\download;
 use function Deployer\get;
+use function Deployer\has;
 use function Deployer\parse;
 use function Deployer\run;
 use function Deployer\set;
 use function Deployer\task;
 use function Deployer\test;
 use function Deployer\upload;
-use function Safe\file_get_contents;
+use function Deployer\writeln;
 use function Safe\file_put_contents;
 use function Safe\sprintf;
 use function Safe\unlink;
 use Setono\CronBuilder\CronBuilder;
 use Setono\CronBuilder\VariableResolver\ReplacingVariableResolver;
 use Setono\CronBuilder\VariableResolver\VariableResolverInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 set('cron_source_dir', 'etc/cronjobs');
 set('cron_delimiter', static function (): string {
@@ -32,7 +33,7 @@ set('cron_context', static function (): array {
 });
 
 // If you're deploying as root you have the option to edit other users' crontabs
-// So this parameters the user to the http_user if you're deploying as root else we don't set it
+// So this parameter is the http_user if you're deploying as root else we don't set it
 set('cron_user', static function (): string {
     if ('root' !== run('whoami')) {
         return '';
@@ -41,18 +42,15 @@ set('cron_user', static function (): string {
     return get('http_user');
 });
 
-task('cron:download', static function (): void {
-    $cronUser = get('cron_user');
-
-    run(sprintf('(crontab -l%s 2>/dev/null || true) > existing_crontab.txt', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
-    download('existing_crontab.txt', 'existing_crontab.txt');
-})->desc('Downloads existing crontab to existing_crontab.txt file');
-
-task('cron:build', static function (): void {
-    $existingCrontab = '';
-    if (file_exists('existing_crontab.txt')) {
-        $existingCrontab = file_get_contents('existing_crontab.txt');
+task('cron:prepare', static function (): void {
+    if (!has('stage')) {
+        // if a stage isn't set then we presume the stage to be prod since you are only deploying to one place
+        set('stage', 'prod');
     }
+})->desc('Prepares parameters for the cron deployer lib');
+
+task('cron:apply', static function (): void {
+    $cronUser = get('cron_user');
 
     $cronBuilder = new CronBuilder([
         'source' => get('cron_source_dir'),
@@ -72,23 +70,21 @@ task('cron:build', static function (): void {
         'release_path' => get('release_path'),
     ]));
 
+    $existingCrontab = run(sprintf('crontab -l%s 2>/dev/null || true', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
+
     $newCrontab = $cronBuilder->merge($existingCrontab, $cronBuilder->build(get('cron_context')));
 
-    if ('' !== $newCrontab) {
-        file_put_contents('new_crontab.txt', $newCrontab);
-    }
-})->desc('Builds a new crontab and saves it to new_crontab.txt');
-
-task('cron:upload', static function (): void {
-    if (!file_exists('new_crontab.txt')) {
+    if ('' === $newCrontab) {
         return;
     }
 
-    $cronUser = get('cron_user');
+    writeln('New crontab', OutputInterface::VERBOSITY_VERBOSE);
+    writeln($newCrontab, OutputInterface::VERBOSITY_VERBOSE);
 
+    file_put_contents('new_crontab.txt', $newCrontab);
     upload('new_crontab.txt', 'new_crontab.txt');
     run(sprintf('cat new_crontab.txt | crontab%s -', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
-})->desc('Uploads and applies the new crontab');
+})->desc('Builds and applies new crontab');
 
 task('cron:cleanup', static function (): void {
     if (file_exists('existing_crontab.txt')) {
