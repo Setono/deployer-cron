@@ -18,7 +18,7 @@
         "webmozart/assert": "^1.0"
     },
     "require-dev": {
-        "setono/code-quality-pack": "^1.4"
+        "setono/code-quality-pack": "^1.4 || ^2.0"
     },
     "config": {
         "sort-packages": true
