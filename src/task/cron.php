@@ -20,6 +20,7 @@ use Setono\CronBuilder\CronBuilder;
 use Setono\CronBuilder\VariableResolver\ReplacingVariableResolver;
 use Setono\CronBuilder\VariableResolver\VariableResolverInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Webmozart\Assert\Assert;
 
 set('cron_source_dir', 'etc/cronjobs');
 set('cron_delimiter', static function (): string {
@@ -39,7 +40,10 @@ set('cron_user', static function (): string {
         return '';
     }
 
-    return get('http_user');
+    $user = get('http_user');
+    Assert::string($user);
+
+    return $user;
 });
 
 task('cron:prepare', static function (): void {
@@ -51,6 +55,7 @@ task('cron:prepare', static function (): void {
 
 task('cron:apply', static function (): void {
     $cronUser = get('cron_user');
+    Assert::string($cronUser);
 
     $cronBuilder = new CronBuilder([
         'source' => get('cron_source_dir'),
@@ -72,7 +77,10 @@ task('cron:apply', static function (): void {
 
     $existingCrontab = run(sprintf('crontab -l%s 2>/dev/null || true', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
 
-    $newCrontab = $cronBuilder->merge($existingCrontab, $cronBuilder->build(get('cron_context')));
+    $cronContext = get('cron_context');
+    Assert::isArray($cronContext);
+
+    $newCrontab = $cronBuilder->merge($existingCrontab, $cronBuilder->build($cronContext));
 
     if ('' === $newCrontab) {
         return;

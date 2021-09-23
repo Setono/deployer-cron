@@ -11,14 +11,13 @@
     ],
     "require": {
         "php": ">=7.4",
-        "deployer/deployer": "^6.0 || ^7.0",
+        "deployer/deployer": "^6.0",
         "setono/cron-builder": "^0.3",
         "symfony/console": "^4.4 || ^5.0",
-        "thecodingmachine/safe": "^1.0",
         "webmozart/assert": "^1.0"
     },
     "require-dev": {
-        "setono/code-quality-pack": "^1.4"
+        "setono/code-quality-pack": "^2.1.2"
     },
     "config": {
         "sort-packages": true
@@ -38,9 +37,9 @@
     },
     "prefer-stable": true,
     "scripts": {
-        "analyse": "phpstan analyse -c phpstan.neon -l max src",
-        "check-style": "ecs check --ansi src/",
-        "fix-style": "ecs check --fix --ansi src/",
+        "analyse": "psalm",
+        "check-style": "ecs check",
+        "fix-style": "ecs check --fix",
         "phpunit": "phpunit"
     }
 }
