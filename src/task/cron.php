@@ -13,13 +13,13 @@ use function Deployer\task;
 use function Deployer\test;
 use function Deployer\upload;
 use function Deployer\writeln;
-use function Safe\file_put_contents;
-use function Safe\sprintf;
-use function Safe\unlink;
+use function file_put_contents;
 use Setono\CronBuilder\CronBuilder;
 use Setono\CronBuilder\VariableResolver\ReplacingVariableResolver;
 use Setono\CronBuilder\VariableResolver\VariableResolverInterface;
+use function sprintf;
 use Symfony\Component\Console\Output\OutputInterface;
+use function unlink;
 use Webmozart\Assert\Assert;
 
 set('cron_source_dir', 'etc/cronjobs');
