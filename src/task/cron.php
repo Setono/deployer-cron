@@ -32,6 +32,7 @@ set('cron_context', static function (): array {
         'stage' => get('stage'),
     ];
 });
+set('cron_dry_run', false);
 
 // If you're deploying as root you have the option to edit other users' crontabs
 // So this parameter is the http_user if you're deploying as root else we don't set it
@@ -47,6 +48,10 @@ set('cron_user', static function (): string {
 });
 
 task('cron:prepare', static function (): void {
+    if (get('cron_dry_run') === true) {
+        writeln('The cron recipe is running in dry run mode, which means it won\'t apply the crontab on the remote server. You can see the resulting crontab by running deployment in verbose mode (-vvv)');
+    }
+
     if (!has('stage')) {
         // if a stage isn't set then we presume the stage to be prod since you are only deploying to one place
         set('stage', 'prod');
@@ -91,7 +96,10 @@ task('cron:apply', static function (): void {
 
     file_put_contents('new_crontab.txt', $newCrontab);
     upload('new_crontab.txt', 'new_crontab.txt');
-    run(sprintf('cat new_crontab.txt | crontab%s -', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
+
+    if (get('cron_dry_run') === false) {
+        run(sprintf('cat new_crontab.txt | crontab%s -', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
+    }
 })->desc('Builds and applies new crontab');
 
 task('cron:cleanup', static function (): void {

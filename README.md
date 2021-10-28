@@ -27,13 +27,14 @@ require_once 'recipe/cron.php';
 
 The following Deployer parameters are defined:
 
-| Parameter               | Description                                                                                      | Default value                   |
-|-------------------------|--------------------------------------------------------------------------------------------------|---------------------------------|
+| Parameter               | Description                                                                                      | Default value                                 |
+|-------------------------|--------------------------------------------------------------------------------------------------|-----------------------------------------------|
 | cron_source_dir         | The directory to search for cronjob config files                                                 | `etc/cronjobs`                                |
 | cron_delimiter          | The marker in the crontab file that delimits the generated cronjobs from manually added cronjobs | `{{application}} ({{stage}})`                 |
 | cron_variable_resolvers | An array of variable resolvers to add to the cron builder                                        | `[]`                                          |
 | cron_context            | The context to give as argument to the `CronBuilder::build` method                               | `[ 'stage' => get('stage') ]`                 |
 | cron_user               | The user onto which the crontab should be added                                                  | `get('http_user')` if you are root, else `''` |
+| cron_dry_run            | If true, this recipe will not apply the generated crontab                                        | `false`                                       |
 
 **NOTICE** that the default value of `cron_variable_resolvers` is an empty array, but this lib will always add a
 `ReplacingVariableResolver` with the variables described in the section [below](#extra-variables-available).
