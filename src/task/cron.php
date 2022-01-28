@@ -10,7 +10,6 @@ use function Deployer\parse;
 use function Deployer\run;
 use function Deployer\set;
 use function Deployer\task;
-use function Deployer\test;
 use function Deployer\upload;
 use function Deployer\writeln;
 use function file_put_contents;
@@ -95,27 +94,16 @@ task('cron:apply', static function (): void {
     writeln($newCrontab, OutputInterface::VERBOSITY_VERBOSE);
 
     file_put_contents('new_crontab.txt', $newCrontab);
-    upload('new_crontab.txt', 'new_crontab.txt');
+    upload('new_crontab.txt', '{{release_path}}/new_crontab.txt');
 
     if (get('cron_dry_run') === false) {
-        run(sprintf('cat new_crontab.txt | crontab%s -', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
+        run(sprintf('cat {{release_path}}/new_crontab.txt | crontab%s -', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
     }
 })->desc('Builds and applies new crontab');
 
 task('cron:cleanup', static function (): void {
-    if (file_exists('existing_crontab.txt')) {
-        @unlink('existing_crontab.txt');
-    }
-
+    // delete local file
     if (file_exists('new_crontab.txt')) {
         @unlink('new_crontab.txt');
-    }
-
-    if (test('[ -f existing_crontab.txt ]')) {
-        run('rm existing_crontab.txt');
-    }
-
-    if (test('[ -f new_crontab.txt ]')) {
-        run('rm new_crontab.txt');
     }
 })->desc('Removes any generated files');
