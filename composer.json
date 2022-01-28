@@ -1,8 +1,8 @@
 {
     "name": "setono/deployer-cron",
-    "type": "library",
     "description": "Use the Setono cron builder to generate cron files in your deployment process",
     "license": "MIT",
+    "type": "library",
     "authors": [
         {
             "name": "Joachim Løvgaard",
@@ -19,14 +19,7 @@
     "require-dev": {
         "setono/code-quality-pack": "^2.1.3"
     },
-    "config": {
-        "sort-packages": true
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.0-dev"
-        }
-    },
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Setono\\Deployer\\Cron\\": "src/"
@@ -35,7 +28,18 @@
             "src/autoload.php"
         ]
     },
-    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": false,
+            "ergebnis/composer-normalize": true
+        },
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    },
     "scripts": {
         "analyse": "psalm",
         "check-style": "ecs check",
