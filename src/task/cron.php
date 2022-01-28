@@ -94,7 +94,7 @@ task('cron:apply', static function (): void {
     writeln($newCrontab, OutputInterface::VERBOSITY_VERBOSE);
 
     file_put_contents('new_crontab.txt', $newCrontab);
-    upload('new_crontab.txt', 'new_crontab.txt');
+    upload('new_crontab.txt', '{{release_path}}/new_crontab.txt');
 
     if (get('cron_dry_run') === false) {
         run(sprintf('cat {{release_path}}/new_crontab.txt | crontab%s -', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
