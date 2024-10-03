@@ -147,6 +147,9 @@ jobs:
             -   name: "Run Docker container"
                 run: "docker run -d -p 2222:22 setono/deployer-cron"
 
+            -   name: "Change permissions"
+                run: "chmod 600 ./tests/docker/ssh_key && chmod 644 ./tests/docker/ssh_key.pub"
+
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
                 with:
