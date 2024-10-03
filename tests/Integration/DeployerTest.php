@@ -21,6 +21,8 @@ final class DeployerTest extends TestCase
     {
         exec(sprintf('cd %s && php %s deploy -n', __DIR__, '../../vendor/bin/dep'), $output, $return);
 
+        echo "\n" . implode("\n", $output) . "\n";
+
         $this->assertSame(0, $return);
 
         $key = PublicKeyLoader::load(file_get_contents(__DIR__ . '/../docker/ssh_key'));
