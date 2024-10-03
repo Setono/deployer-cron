@@ -19,9 +19,7 @@ final class DeployerTest extends TestCase
      */
     public function it_deploys(): void
     {
-        echo "\nWorking dir: " . __DIR__ . "\n";
-
-        exec(sprintf('cd %s && php %s deploy -n', __DIR__, '../../vendor/bin/dep'), $output, $return);
+        exec(sprintf('cd %s && php %s deploy -n -vvv', __DIR__, '../../vendor/bin/dep'), $output, $return);
 
         echo "\n" . implode("\n", $output) . "\n";
 
