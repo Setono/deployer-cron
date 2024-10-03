@@ -19,9 +19,7 @@ final class DeployerTest extends TestCase
      */
     public function it_deploys(): void
     {
-        exec(sprintf('cd %s && php %s deploy -n -vvv', __DIR__, '../../vendor/bin/dep'), $output, $return);
-
-        fwrite(STDERR, print_r($output, true));
+        exec(sprintf('cd %s && php %s deploy -n', __DIR__, '../../vendor/bin/dep'), $output, $return);
 
         $this->assertSame(0, $return);
 
