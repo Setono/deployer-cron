@@ -20,7 +20,8 @@
     "require-dev": {
         "phpseclib/phpseclib": "^3.0",
         "phpunit/phpunit": "^10.5",
-        "setono/code-quality-pack": "^2.8.2"
+        "setono/code-quality-pack": "^2.8.2",
+        "shipmonk/composer-dependency-analyser": "^1.7"
     },
     "prefer-stable": true,
     "autoload": {
