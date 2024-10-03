@@ -33,8 +33,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Setono\\Deployer\\Cron\\": "tests/",
-            "Deployer\\": "vendor/deployer/deployer/src/"
+            "Deployer\\": "vendor/deployer/deployer/src/",
+            "Setono\\Deployer\\Cron\\": "tests/"
         }
     },
     "config": {
