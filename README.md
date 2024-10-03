@@ -10,11 +10,11 @@ Simple handling of cronjobs in your deployment process using the [Cron builder l
 ## Installation
 
 ```bash
-$ composer require setono/deployer-cron
+composer require setono/deployer-cron
 ```
 
 ## Usage
-The easiest usage is to include the cron recipe which hooks into default Deployer events:
+The easiest usage is to include the cron recipe which hooks into default Deployer lifecycle:
 
 ```php
 <?php
@@ -30,47 +30,54 @@ The following Deployer parameters are defined:
 | Parameter               | Description                                                                                      | Default value                                 |
 |-------------------------|--------------------------------------------------------------------------------------------------|-----------------------------------------------|
 | cron_config_dir         | The directory to search for cronjob config files                                                 | `etc/cronjobs`                                |
-| cron_delimiter          | The marker in the crontab file that delimits the generated cronjobs from manually added cronjobs | `{{application}} ({{stage}})`                 |
+| cron_delimiter          | The marker in the crontab file that delimits the generated cronjobs from manually added cronjobs | The stage. If not set, the default is `prod`. |
 | cron_user               | The user onto which the crontab should be added (default is `remote_user`)                       | `get('http_user')` if you are root, else `''` |
 
-## Build context
+## Cron builder context
 
-The default build context is defined in the Deployer parameter `cron_context`. It adds the stage as context which means
-you can use the `condition` key in your cronjob config:
+The cron builder context is set to the Deployer configuration parameters. This means you can use variables in your
+cronjob config files. For example:
 
-```yaml
-# /etc/cronjobs/jobs.yaml
+```php
+<?php
+# etc/cronjobs/jobs.php
 
-- schedule: "0 0 * * *"
-  command: "%php_bin% %release_path%/bin/console my:dev:command"
-  condition: "context.stage === 'dev'"
+declare(strict_types=1);
+
+use Setono\CronBuilder\Context;
+use Setono\CronBuilder\CronJob;
+
+return static function (Context $context): iterable {
+    yield new CronJob('0 0 * * *', '/usr/bin/php {{ release_path }}/send-report.php', 'Run every day at midnight');
+
+    if ($context->get('stage') === 'prod') {
+        yield new CronJob('0 0 * * *', '/usr/bin/php {{ release_path }}/process.php');
+    }
+};
 ```
 
-The above cronjob will only be added to the final cron file if the deployment stage equals `dev`.
+Notice the usage of `release_path` and `stage` in the cronjob config file.
 
-## Extra variables available
+## Testing
 
-This library also adds more variables you can use in your cronjob configs:
+1. Build the Docker image:
 
-- `%application%`: Will output the application name
-- `%stage%`: Will output the stage, i.e. `dev`, `staging`, or `prod`
-- `%php_bin%`: Will output the path to the PHP binary
-- `%release_path%`: Will output the release path on the server
-
-With these variables you can define a cronjob like:
-
-```yaml
-# /etc/cronjobs/jobs.yaml
-
-- schedule: "0 0 * * *"
-  command: "%php_bin% %release_path%/bin/console my:command"
+```shell
+docker build -t setono/deployer-cron --no-cache ./tests/docker
 ```
 
-And that will translate into the following line in your crontab:
+2. Run the Docker container:
 
-```text
-0 0 * * * /usr/bin/php /var/www/your_application/releases/23/bin/console my:command
+```shell
+docker run -d -p 2222:22 setono/deployer-cron
 ```
+
+3. Run the tests:
+
+```shell
+vendor/bin/phpunit
+```
+
 
 [ico-version]: https://poser.pugx.org/setono/deployer-cron/v/stable
 [ico-unstable-version]: https://poser.pugx.org/setono/deployer-cron/v/unstable

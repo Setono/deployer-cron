@@ -6,7 +6,6 @@ namespace Setono\Deployer\Cron;
 
 use Deployer\Deployer;
 use function Deployer\get;
-use function Deployer\parse;
 use function Deployer\run;
 use function Deployer\set;
 use function Deployer\task;
@@ -18,8 +17,22 @@ use Webmozart\Assert\Assert;
 
 set('cron_config_dir', 'etc/cronjobs');
 set('cron_delimiter', static function (): string {
-    return parse('{{application}} ({{stage}})');
+    $labels = get('labels');
+    if (!is_array($labels)) {
+        return 'prod';
+    }
+
+    if (!isset($labels['stage'])) {
+        return 'prod';
+    }
+
+    $stage = $labels['stage'];
+    Assert::stringNotEmpty($stage);
+
+    return $stage;
 });
+set('crontab_filename', 'crontab.txt');
+set('crontab_backup_filename', 'crontab.backup.txt');
 
 // If you're deploying as root you have the option to edit other users' crontabs
 // So this parameter is the http_user if you're deploying as root else we don't set it
@@ -37,7 +50,6 @@ set('cron_user', static function (): string {
 task('cron:prepare', [
     'cron:validate',
     'cron:backup',
-    'cron:build',
 ]);
 
 task('cron:validate', static function (): void {
@@ -55,10 +67,10 @@ task('cron:backup', static function (): void {
         return;
     }
 
-    file_put_contents('crontab.backup.txt', $crontab); // todo allow to set the backup file name
+    file_put_contents(get('crontab_backup_filename'), $crontab);
 })->desc('Backups the old crontab and stores it locally');
 
-task('cron:build', static function (): void {
+task('cron:apply', static function (): void {
     $cronUser = getCronUser();
 
     $cronBuilder = (new CronBuilder())
@@ -71,35 +83,46 @@ task('cron:build', static function (): void {
         )
     ;
 
-    $config = Deployer::get()->config->ownValues();
+    $config = [];
+    foreach (Deployer::get()->config->ownValues() as $key => $value) {
+        if (is_callable($value)) {
+            continue;
+        }
+
+        $config[$key] = get($key);
+    }
+
     if (Context::has()) {
         $context = Context::get();
         if (false !== $context) {
-            $config = array_merge($config, $context->getConfig()->ownValues());
+            foreach ($context->getConfig()->ownValues() as $key => $value) {
+                if (is_callable($value)) {
+                    continue;
+                }
+
+                $config[$key] = get($key);
+            }
         }
     }
 
-    foreach ($config as $key => $value) {
-        $cronBuilder->addContext($key, $value);
-    }
+    $cronBuilder->setContext($config);
 
-    $existingCrontab = run(sprintf('crontab -l%s 2>/dev/null || true', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
-    $newCrontab = CronBuilder::merge($existingCrontab, $cronBuilder);
+    file_put_contents(get('crontab_filename'), CronBuilder::merge(
+        file_get_contents(get('crontab_backup_filename')),
+        $cronBuilder,
+    ));
 
-    file_put_contents('crontab.txt', $newCrontab);
-    upload('crontab.txt', '{{release_path}}/crontab.txt');
-});
-
-task('cron:apply', static function (): void {
-    $cronUser = getCronUser();
-
-    run(sprintf('cat {{release_path}}/crontab.txt | crontab%s -', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
+    upload(get('crontab_filename'), '{{release_path}}/{{crontab_filename}}');
+    run(sprintf('cat {{release_path}}/{{crontab_filename}} | crontab%s -', $cronUser !== '' ? (' -u ' . $cronUser) : ''));
 });
 
 task('cron:cleanup', static function (): void {
-    // delete local file
-    if (file_exists('crontab.txt')) {
-        @unlink('crontab.txt');
+    if (file_exists(get('crontab_filename'))) {
+        @unlink(get('crontab_filename'));
+    }
+
+    if (file_exists(get('crontab_backup_filename'))) {
+        @unlink(get('crontab_backup_filename'));
     }
 });
 

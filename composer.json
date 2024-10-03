@@ -18,6 +18,8 @@
         "webmozart/assert": "^1.10"
     },
     "require-dev": {
+        "phpseclib/phpseclib": "^3.0",
+        "phpunit/phpunit": "^10.5",
         "setono/code-quality-pack": "^2.8.2"
     },
     "prefer-stable": true,
@@ -33,10 +35,7 @@
         "psr-4": {
             "Setono\\Deployer\\Cron\\": "tests/",
             "Deployer\\": "vendor/deployer/deployer/src/"
-        },
-        "files": [
-            "vendor/deployer/deployer/src/functions.php"
-        ]
+        }
     },
     "config": {
         "allow-plugins": {
