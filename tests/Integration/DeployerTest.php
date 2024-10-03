@@ -21,7 +21,7 @@ final class DeployerTest extends TestCase
     {
         exec(sprintf('cd %s && php %s deploy -n -vvv', __DIR__, '../../vendor/bin/dep'), $output, $return);
 
-        echo "\n" . implode("\n", $output) . "\n";
+        fwrite(STDERR, print_r($output, true));
 
         $this->assertSame(0, $return);
 
