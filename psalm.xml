@@ -16,18 +16,4 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
-    <issueHandlers>
-        <UndefinedFunction>
-            <errorLevel type="suppress">
-                <!-- This could be fixed by adding the Deployer's functions.php to our autoload, but that makes our deploy.php file not work -->
-                <referencedFunction name="Deployer\after"/>
-                <referencedFunction name="Deployer\before"/>
-                <referencedFunction name="Deployer\get"/>
-                <referencedFunction name="Deployer\run"/>
-                <referencedFunction name="Deployer\set"/>
-                <referencedFunction name="Deployer\task"/>
-                <referencedFunction name="Deployer\upload"/>
-            </errorLevel>
-        </UndefinedFunction>
-    </issueHandlers>
 </psalm>

@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": ">=8.1",
-        "deployer/deployer": "^7.4",
+        "deployer/deployer": "^7.5",
         "setono/cron-builder": "^1.0@alpha",
         "symfony/finder": "^5.4 || ^6.4 || ^7.0",
         "webmozart/assert": "^1.10"
@@ -19,7 +19,7 @@
     "require-dev": {
         "phpseclib/phpseclib": "^3.0",
         "phpunit/phpunit": "^10.5",
-        "setono/code-quality-pack": "^2.8.2",
+        "setono/code-quality-pack": "^2.9",
         "shipmonk/composer-dependency-analyser": "^1.7"
     },
     "prefer-stable": true,
@@ -35,7 +35,10 @@
         "psr-4": {
             "Deployer\\": "vendor/deployer/deployer/src/",
             "Setono\\Deployer\\Cron\\": "tests/"
-        }
+        },
+        "files": [
+            "vendor/deployer/deployer/src/functions.php"
+        ]
     },
     "config": {
         "allow-plugins": {
