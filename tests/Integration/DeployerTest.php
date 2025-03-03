@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 final class DeployerTest extends TestCase
 {
+    #[\Override]
     protected function assertPreConditions(): void
     {
         self::assertFileExists(__DIR__ . '/deploy.php');
