@@ -13,7 +13,7 @@ composer require setono/deployer-cron
 ```
 
 ## Usage
-The easiest usage is to include the cron recipe which hooks into default Deployer lifecycle:
+The easiest usage is to include the cron recipe which hooks into the default Deployer lifecycle:
 
 ```php
 <?php
@@ -55,7 +55,9 @@ return static function (Context $context): iterable {
 };
 ```
 
-Notice the usage of `release_path` and `stage` in the cronjob config file.
+Notice the usage of `release_path` and `stage` in the cronjob config file. This is possible because the Deployer
+configuration is added as context on the cron builder. An important note about this feature is that Deployer configuration
+having `/` in their key will be escaped with `_`. An example: `bin/console` is available as `bin_console`.
 
 [ico-version]: https://poser.pugx.org/setono/deployer-cron/v/stable
 [ico-license]: https://poser.pugx.org/setono/deployer-cron/license
