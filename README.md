@@ -47,7 +47,7 @@ use Setono\CronBuilder\Context;
 use Setono\CronBuilder\CronJob;
 
 return static function (Context $context): iterable {
-    yield new CronJob('0 0 * * *', '/usr/bin/php {{ release_path }}/send-report.php', 'Run every day at midnight');
+    yield new CronJob('0 0 * * *', '{{ context("bin/php") }} {{ release_path }}/send-report.php', 'Run every day at midnight');
 
     if ($context->get('stage') === 'prod') {
         yield new CronJob('0 0 * * *', '/usr/bin/php {{ release_path }}/process.php');
@@ -55,9 +55,9 @@ return static function (Context $context): iterable {
 };
 ```
 
-Notice the usage of `release_path` and `stage` in the cronjob config file. This is possible because the Deployer
-configuration is added as context on the cron builder. An important note about this feature is that Deployer configuration
-having `/` in their key will be escaped with `_`. An example: `bin/console` is available as `bin_console`.
+Notice the usage of `bin/php`, `release_path` and `stage` in the cronjob config file. This is possible because the Deployer
+configuration is added as context on the cron builder. When the Deployer context key contains a character that would
+otherwise be interpreted by Twig (e.g. `/`) you can use the `context` Twig function to get the value.
 
 [ico-version]: https://poser.pugx.org/setono/deployer-cron/v/stable
 [ico-license]: https://poser.pugx.org/setono/deployer-cron/license

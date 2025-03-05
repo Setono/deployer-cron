@@ -76,7 +76,7 @@ task('cron:apply', static function (): void {
             continue;
         }
 
-        $cronBuilder->context->set(sanitizeContextKey($key), get($key));
+        $cronBuilder->context->set($key, get($key));
     }
 
     if (Context::has()) {
@@ -87,7 +87,7 @@ task('cron:apply', static function (): void {
                     continue;
                 }
 
-                $cronBuilder->context->set(sanitizeContextKey($key), get($key));
+                $cronBuilder->context->set($key, get($key));
             }
         }
     }
@@ -117,9 +117,4 @@ function getCronUser(): string
     Assert::string($cronUser);
 
     return $cronUser;
-}
-
-function sanitizeContextKey(string $key): string
-{
-    return str_replace('/', '_', $key);
 }
