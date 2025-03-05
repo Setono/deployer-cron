@@ -57,27 +57,6 @@ return static function (Context $context): iterable {
 
 Notice the usage of `release_path` and `stage` in the cronjob config file.
 
-## Testing
-
-1. Build the Docker image:
-
-```shell
-docker build -t setono/deployer-cron --no-cache ./tests/docker
-```
-
-2. Run the Docker container:
-
-```shell
-docker run -d -p 2222:22 setono/deployer-cron
-```
-
-3. Run the tests:
-
-```shell
-vendor/bin/phpunit
-```
-
-
 [ico-version]: https://poser.pugx.org/setono/deployer-cron/v/stable
 [ico-license]: https://poser.pugx.org/setono/deployer-cron/license
 [ico-github-actions]: https://github.com/Setono/deployer-cron/workflows/build/badge.svg
